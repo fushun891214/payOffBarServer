@@ -1,13 +1,15 @@
 import express, { Express } from 'express';
 import cors from 'cors';
 import connectDB from './config/database';
+import userRoutes from './routes/userRoutes';
 
 const app: Express = express();
 
 // Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(cors());  // 處理跨來源資源共用的中間件
+app.use(express.json()); // 將request的JSON格式轉換成JavaScript對象
+app.use(express.urlencoded({ extended: true })); // 用來解析 URL-encoded 格式的請求體
+app.use('/api/users',userRoutes);
 
 // Routes
 app.get('/', (req, res) => {
