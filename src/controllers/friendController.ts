@@ -30,12 +30,12 @@ export const addFriend = async (req: Request, res: Response) => {
         // }
 
         // 檢查是否嘗試加自己為好友
-        // if (currentUser.userID === userID) {
-        //     return res.status(400).json({
-        //         success: false,
-        //         message: 'Cannot add yourself as friend'
-        //     });
-        // }
+        if (userID === friendID) {
+            return res.status(400).json({
+                success: false,
+                message: 'Cannot add yourself as friend'
+            });
+        }
 
         // 檢查是否已經是好友
         const existingFriendship = await Friend.findOne({
