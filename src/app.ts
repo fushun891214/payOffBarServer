@@ -3,6 +3,7 @@ import cors from 'cors';
 import connectDB from './config/database';
 import userRoutes from './routes/userRoutes';
 import friendRoutes from './routes/friendRoutes';
+import groupRoutes from './routes/groupRoutes';
 
 const app: Express = express();
 
@@ -12,6 +13,7 @@ app.use(express.json()); // 將request的JSON格式轉換成JavaScript對象
 app.use(express.urlencoded({ extended: true })); // 用來解析 URL-encoded 格式的請求體
 app.use('/api/users',userRoutes);
 app.use('/api/friends',friendRoutes);
+app.use('/api/group',groupRoutes);
 
 // Routes
 app.get('/', (req, res) => {

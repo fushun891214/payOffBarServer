@@ -3,8 +3,6 @@ import mongoose,{Document,Schema} from "mongoose";
 interface IFriend extends Document{
     userID: string,
     friendID: string,
-    userName: string,
-    friendName: string,
     status: string,
     createdAt: Date
 }
