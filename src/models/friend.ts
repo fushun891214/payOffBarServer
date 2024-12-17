@@ -18,14 +18,6 @@ const friendSchema = new Schema<IFriend>({
         type: String,
         required: true,
     },
-    userName:{
-        type: String,
-        required: true,
-    },
-    friendName:{
-        type: String,
-        required: true
-    },
     status:{
         type: String,
         enum: ['pending', 'accepted'],

@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import jwt from 'jsonwebtoken';
+// import jwt from 'jsonwebtoken';
 import User from "../models/user";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'mmslab406';
+// const JWT_SECRET = process.env.JWT_SECRET || 'mmslab406';
 
 export const registerUser = async (req:Request,res:Response) => {
     try{
@@ -23,7 +23,10 @@ export const registerUser = async (req:Request,res:Response) => {
 
         res.status(201).json({
             success: true,
-            data: newUser
+            data: {
+                userName: newUser.userName,
+                userID: newUser.userID
+            }
         });
     }catch(error){
         console.error('Registration error:',error);
@@ -55,22 +58,22 @@ export const loginUser = async (req: Request,res: Response) => {
         }
 
         // 生成 JWT token
-        const token = jwt.sign(
-            { 
-                userID: user.userID,
-                userName: user.userName
-            },
-            JWT_SECRET,
-            { expiresIn: '24h' }
-        );
+        // const token = jwt.sign(
+        //     { 
+        //         userID: user.userID,
+        //         userName: user.userName
+        //     },
+        //     JWT_SECRET,
+        //     { expiresIn: '24h' }
+        // );
 
         res.status(200).json({
             success: true,
             data:{
                 userName:user.userName,
                 userID:user.userID,
-                _id:user._id,
-                token
+                // _id:user._id,
+                // token
             }
         });
     }catch(error){

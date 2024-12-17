@@ -4,41 +4,44 @@ import Friend from "../models/friend";
 
 export const addFriend = async (req: Request, res: Response) => {
     try {
-        const { userName, userID } = req.body;
-        console.log('Request body:', req.body);
-        console.log('Current user:', req.user);
+        const { userID, friendID } = req.body;
+        // console.log('Request body:', req.body);
+        // console.log('Current user:', req.user);
 
+        // 查詢發送好友邀請的用戶
+        const user = await User.findOne({ userID:userID });
         // 查找要加為好友的用戶
-        const friendUser = await User.findOne({ userName, userID });
-        if (!friendUser) {
+        const friendUser = await User.findOne({ userID:friendID });
+
+        if (!user || !friendUser) {
             return res.status(404).json({
                 success: false,
-                message: 'User not found'
+                message: 'One or both users not found'
             });
         }
 
         // 從 auth 中間件獲取當前用戶信息
-        const currentUser = req.user;
-        if (!currentUser) {
-            return res.status(401).json({
-                success: false,
-                message: 'Not authenticated'
-            });
-        }
+        // const currentUser = req.user;
+        // if (!currentUser) {
+        //     return res.status(401).json({
+        //         success: false,
+        //         message: 'Not authenticated'
+        //     });
+        // }
 
         // 檢查是否嘗試加自己為好友
-        if (currentUser.userID === userID) {
-            return res.status(400).json({
-                success: false,
-                message: 'Cannot add yourself as friend'
-            });
-        }
+        // if (currentUser.userID === userID) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Cannot add yourself as friend'
+        //     });
+        // }
 
         // 檢查是否已經是好友
         const existingFriendship = await Friend.findOne({
             $or: [
-                { userID: currentUser.userID, friendID: userID },
-                { userID: userID, friendID: currentUser.userID }
+                { userID: userID, friendID: friendID },
+                { userID: friendID, friendID: userID }
             ]
         });
 
@@ -50,32 +53,30 @@ export const addFriend = async (req: Request, res: Response) => {
         }
 
         // 打印詳細信息
-        console.log('Creating friendship with:', {
-            userID: currentUser.userID,
-            friendID: userID,
-            userName: currentUser.userName,
-            friendName: userName
-        });
+        // console.log('Creating friendship with:', {
+        //     userID: currentUser.userID,
+        //     friendID: userID,
+        //     userName: currentUser.userName,
+        //     friendName: userName
+        // });
 
         // 創建新的好友關係
         const newFriendship = await Friend.create({
-            userID: currentUser.userID,
-            friendID: userID,
-            userName: currentUser.userName,
-            friendName: userName,
-            status: 'pending'
+            userID: userID,
+            friendID: friendID,
+            status: 'accepted'
         });
 
         return res.status(201).json({
             success: true,
             data: {
-                friendshipId: newFriendship._id,
+                // friendshipId: newFriendship._id,
                 userID: newFriendship.userID,
                 friendID: newFriendship.friendID,
-                userName: newFriendship.userName,
-                friendName: newFriendship.friendName,
+                // userName: newFriendship.userName,
+                // friendName: newFriendship.friendName,
                 status: newFriendship.status,
-                createdAt: newFriendship.createdAt
+                // createdAt: newFriendship.createdAt
             }
         });
     } catch (error) {
@@ -86,3 +87,66 @@ export const addFriend = async (req: Request, res: Response) => {
         });
     }
 };
+
+export const getFriendshipList = async (req:Request, res:Response) => {
+    try{
+        const {userID} = req.body;
+
+        const user = await User.findOne({userID:userID});
+
+        if(!user){
+            return res.status(404).json({
+                success: false,
+                message: 'user not found'
+            });
+        }
+
+        const friendshipList = await Friend.aggregate([
+            {
+                $match:{
+                    $or:[
+                        {userID:userID},
+                        {friendID:userID}
+                    ],
+                    status:'accepted'
+                }
+            },
+            {
+                $group:{
+                    _id:{
+                        $cond:[
+                            {$eq:['$userID',userID]},
+                            "$friendID",
+                            "$userID"
+                        ]
+                    }
+                }
+            },
+            {
+                $project:{
+                    _id:0,
+                    friendID:"$_id"
+                }
+            }
+        ]);
+
+        if(friendshipList.length === 0){
+            return res.status(200).json({
+                success:true,
+                data:[],
+                message:'No friends found'
+            })
+        }
+
+        return res.status(200).json({
+            success:true,
+            data:friendshipList.map(e => e.friendID),
+            count:friendshipList.length
+        });
+    }catch(error){
+        return res.status(500).json({
+            success:false,
+            message:'Error getting friendship list'
+        });
+    }
+}
