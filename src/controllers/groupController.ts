@@ -1,8 +1,7 @@
 import { Request,Response } from "express";
 import Group from "../models/group";
-import GroupMember from "../models/groupMember";
+import GroupMember,{ IMemberInput}  from "../models/groupMember";
 import User from "../models/user";
-import { IMemberInput } from "../models/interfaces";
 
 export const createGroup = async (req:Request,res:Response) => {
     try{
@@ -31,7 +30,7 @@ export const createGroup = async (req:Request,res:Response) => {
                     groupID: groupID,
                     userID: member.userID,
                     amount: member.amount,
-                    payStatus: false
+                    payStatus: member.payStatus = false
                 });
             })
         );
@@ -56,6 +55,54 @@ export const createGroup = async (req:Request,res:Response) => {
         return res.status(500).json({
             success:false,
             message:'Error creating group'
+        });
+    }
+}
+
+export const editGroup = async (req:Request,res:Response) => {
+    try{
+        const {groupID,members} = req.body;
+
+        const group = await Group.findOne({groupID:groupID});
+
+        if(!group){
+            return res.status(404).json({
+                success: false,
+                message: 'Group not found'
+            });
+        }
+
+        const updatedMembers = await Promise.all(
+            members.map(async (member:IMemberInput) => {
+                const updatedMember = await GroupMember.findOneAndUpdate(
+                    {groupID: groupID,userID: member.userID },
+                    {payStatus: member.payStatus},
+                    {new: true},
+                );
+                return updatedMember;
+            })
+        );
+
+        return res.status(200).json({
+            success: true,
+            data:{
+                groupID: group.groupID,
+                groupName: group.groupName,
+                creatorID: group.creatorID,
+                members: updatedMembers.map(member => ({
+                    userID: member?.userID,
+                    amount: member?.amount,
+                    payStatus: member?.payStatus
+                })),
+                updateAt: group.updatedAt
+            }
+        });
+
+    }catch(error){
+        console.error('Edit group error',error);
+        return res.status(500).json({
+            success:false,
+            message:'Error editing group'
         });
     }
 }

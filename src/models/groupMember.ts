@@ -9,6 +9,12 @@ interface IGroupMember extends Document{
     updatedAt: Date
 }
 
+export interface IMemberInput{
+    userID: string,
+    amount: number,
+    payStatus: boolean
+}
+
 const groupMemberSchema = new Schema<IGroupMember>({
     groupID:{
         type: String,
