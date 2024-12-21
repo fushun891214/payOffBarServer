@@ -1,10 +1,9 @@
 import mongoose,{Document,Schema} from "mongoose";
 
 interface IGroup extends Document{
-    groupID:String,
-    groupName:String,
-    ownerID:String,
-    status:String,
+    groupID:string,
+    groupName:string,
+    creatorID:string,
     createdAt:Date,
     updatedAt:Date
 }
@@ -19,15 +18,10 @@ const groupSchema = new Schema <IGroup> ({
         type:String,
         required:true
     },
-    ownerID:{
+    creatorID:{
         type:String,
         required:true
     },
-    status:{
-        type:String,
-        enum:['active','inactive','archived'],
-        default:'active'
-    }
 },{
     timestamps:true
 });
