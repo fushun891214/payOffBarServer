@@ -155,3 +155,43 @@ export const getUserGroup = async (req:Request,res:Response) => {
         });
     }
 }
+
+export const getGroupDetail = async (req:Request,res:Response) => {
+    try{
+        const {groupID} = req.params;
+
+        const group = await Group.findOne({groupID});
+
+        if(!group){
+            return res.status(404).json({
+                success: false,
+                message: 'Group not found'
+            });
+        }
+
+        const groupMembers = await GroupMember.find({groupID});
+
+        const groupDetail = ({
+            groupID: group.groupID,
+            groupName: group.groupName,
+            creatorID: group.creatorID,
+            members: groupMembers.map(member => ({
+                userID: member.userID,
+                amount: member.amount,
+                payStatus: member.payStatus
+            })),
+        });
+
+        return res.status(200).json({
+            success: true,
+            data: groupDetail
+        });
+
+    }catch(error){
+        console.error('Get group detail error',error);
+        return res.status(500).json({
+            success:false,
+            message:'Error getting group detail'
+        });
+    }
+}

@@ -1,5 +1,5 @@
 import express,{Request,Response} from "express";
-import { createGroup, editGroup,getUserGroup } from "../controllers/groupController";
+import { createGroup, editGroup,getGroupDetail,getUserGroup } from "../controllers/groupController";
 
 const router = express.Router();
 
@@ -13,6 +13,10 @@ router.post('/edit',async (req:Request,res:Response) =>{
 
 router.get('/getUserGroup/:userID',async (req:Request,res:Response) =>{
     await getUserGroup(req,res);
+});
+
+router.get('/getGroupDetail/:groupID',async (req:Request,res:Response) =>{
+    await getGroupDetail(req,res);
 });
 
 export default router;
