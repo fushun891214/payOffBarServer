@@ -106,3 +106,52 @@ export const editGroup = async (req:Request,res:Response) => {
         });
     }
 }
+
+export const getUserGroup = async (req:Request,res:Response) => {
+    try{
+        const {userID} = req.params;
+
+        const groupAsMember = await GroupMember.find({userID});
+
+        const groupAsCreator = await Group.find({creatorID: userID});
+
+        const groupList = await Promise.all([
+            ...await Promise.all(groupAsMember.map(async member => {
+                const group = await Group.findOne({groupID: member.groupID});
+                if(!group) return null;
+
+                return{
+                    groupID: group.groupID,
+                    groupName: group.groupName,
+                    role: 'payer',
+                    status: member.payStatus ? 'paid' : 'unpaid'
+                }
+            })),
+
+            ...await groupAsCreator.map(group => ({
+                groupID: group.groupID,
+                groupName: group.groupName,
+                role: 'creator',
+                status: 'creator'
+            }))
+        ]);
+
+        const uniqueGroups = groupList.filter((group): group is NonNullable<typeof group> => 
+            group !== null
+        ).filter((group, index, self) => 
+            index === self.findIndex(g => g.groupID === group.groupID)
+        );
+
+        return res.status(200).json({
+            success: true,
+            data: uniqueGroups
+        });
+    }
+    catch(error){
+        console.error('Get group error',error);
+        return res.status(500).json({
+            success:false,
+            message:'Error editing group'
+        });
+    }
+}
