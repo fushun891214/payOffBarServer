@@ -1,5 +1,5 @@
 import express,{Request,Response} from "express";
-import { createGroup, editGroup,getGroupDetail,getUserGroup } from "../controllers/groupController";
+import { createGroup, editGroup,getGroupDetail,getUserGroup, deleteGroup } from "../controllers/groupController";
 
 const router = express.Router();
 
@@ -17,6 +17,10 @@ router.get('/getUserGroup/:userID',async (req:Request,res:Response) =>{
 
 router.get('/getGroupDetail/:groupID',async (req:Request,res:Response) =>{
     await getGroupDetail(req,res);
+});
+
+router.delete('/deleteGroup/:groupID',async (req:Request,res:Response) =>{
+    await deleteGroup(req,res);
 });
 
 export default router;

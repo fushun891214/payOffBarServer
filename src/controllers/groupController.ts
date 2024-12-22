@@ -195,3 +195,35 @@ export const getGroupDetail = async (req:Request,res:Response) => {
         });
     }
 }
+
+export const deleteGroup = async (req:Request,res:Response) => {
+    try{
+        const {groupID} = req.params;
+
+        const group = await Group.findOne({groupID});
+
+        if(!group){
+            return res.status(404).json({
+                success: false,
+                message: 'Group not found'
+            });
+        }
+
+        await Promise.all([
+            Group.deleteOne({groupID}),
+            GroupMember.deleteMany({groupID})
+        ]);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Group deleted successfully'
+        });
+    }
+    catch(error){
+        console.error('Delete group error',error);
+        return res.status(500).json({
+            success:false,
+            message:'Error deleting group'
+        });
+    }
+}
