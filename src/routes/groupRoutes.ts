@@ -1,5 +1,5 @@
 import express,{Request,Response} from "express";
-import { createGroup, editGroup,getGroupDetail,getUserGroup, deleteGroup } from "../controllers/groupController";
+import { createGroup, editGroup,getGroupDetail,getUserGroup, deleteGroup, notifyUnpaidMembers } from "../controllers/groupController";
 
 const router = express.Router();
 
@@ -21,6 +21,10 @@ router.get('/getGroupDetail/:groupID',async (req:Request,res:Response) =>{
 
 router.delete('/deleteGroup/:groupID',async (req:Request,res:Response) =>{
     await deleteGroup(req,res);
+});
+
+router.get('/notifyUnpaidMembers',async (req:Request,res:Response) =>{
+    await notifyUnpaidMembers(req,res);
 });
 
 export default router;

@@ -2,6 +2,7 @@ import { Request,Response } from "express";
 import Group from "../models/group";
 import GroupMember,{ IMemberInput}  from "../models/groupMember";
 import User from "../models/user";
+import admin from '../config/firebase';
 
 export const createGroup = async (req:Request,res:Response) => {
     try{
@@ -224,6 +225,60 @@ export const deleteGroup = async (req:Request,res:Response) => {
         return res.status(500).json({
             success:false,
             message:'Error deleting group'
+        });
+    }
+}
+
+export const notifyUnpaidMembers = async (req:Request,res:Response) => {
+    try{
+        const {groupID} = req.params;
+
+        const group = await Group.findOne({groupID});
+
+        if(!group){
+            return res.status(404).json({
+                success: false,
+                message: 'Group not found'
+            });
+        }
+
+        const unpaidMembers = await GroupMember.find({groupID,payStatus:false});
+
+        const unpaidUserIDs = unpaidMembers.map(member => member.userID);
+
+        const users = await User.find({
+            userID: {$in: unpaidUserIDs},
+            fcmToken: {$exists: true}
+        });
+
+        const noteifications = users.map(user => 
+            admin.messaging().send({
+                token: user.fcmToken!,
+                notification: {
+                    title: '付款提醒',
+                    body: `請記得支付${group.groupName}的款項`
+                },
+                data: {
+                    groupID: groupID,
+                    type: 'payment_reminder'
+                }   
+            })
+        );
+
+        console.log('Would send notifications: ', noteifications);
+
+        await Promise.all(noteifications);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Notification sent successfully'
+        });
+    }
+    catch(error){
+        console.error('Notify unpaid members error',error);
+        return res.status(500).json({
+            success:false,
+            message:'Error notifying unpaid members'
         });
     }
 }

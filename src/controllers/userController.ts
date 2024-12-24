@@ -18,14 +18,14 @@ export const registerUser = async (req:Request,res:Response) => {
 
         const newUser = await User.create({
             userName,
-            userID
+            userID,
         });
 
         res.status(201).json({
             success: true,
             data: {
                 userName: newUser.userName,
-                userID: newUser.userID
+                userID: newUser.userID,
             }
         });
     }catch(error){
@@ -39,7 +39,7 @@ export const registerUser = async (req:Request,res:Response) => {
 
 export const loginUser = async (req: Request,res: Response) => {
     try{
-        const { userName,userID } = req.body;
+        const { userName,userID,fcmToken } = req.body;
 
         if(!userName || !userID){
             return res.status(400).json({
@@ -48,7 +48,11 @@ export const loginUser = async (req: Request,res: Response) => {
             });
         }
 
-        const user = await User.findOne({userName,userID});
+        const user = await User.findOneAndUpdate(
+            { userName, userID },
+            { fcmToken: fcmToken },  // 更新 fcmToken
+            { new: true }            // 返回更新後的文件
+        );
 
         if(!user){
             return res.status(401).json({
@@ -72,6 +76,7 @@ export const loginUser = async (req: Request,res: Response) => {
             data:{
                 userName:user.userName,
                 userID:user.userID,
+                fcmToken: user.fcmToken,
                 // _id:user._id,
                 // token
             }

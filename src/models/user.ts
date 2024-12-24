@@ -3,6 +3,7 @@ import mongoose , { Document,Schema} from "mongoose";
 interface IUser extends Document{
     userName: string;
     userID: string;
+    fcmToken?: string;
 }
 
 const userSchema = new Schema<IUser>({
@@ -15,6 +16,10 @@ const userSchema = new Schema<IUser>({
         type: String,
         required: true,
         trim: true
+    },
+    fcmToken:{
+        type: String,
+        required: false,
     }
 },{
     timestamps:true
