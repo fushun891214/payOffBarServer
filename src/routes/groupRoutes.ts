@@ -23,7 +23,7 @@ router.delete('/deleteGroup/:groupID',async (req:Request,res:Response) =>{
     await deleteGroup(req,res);
 });
 
-router.get('/notifyUnpaidMembers',async (req:Request,res:Response) =>{
+router.get('/notifyUnpaidMembers/:groupID',async (req:Request,res:Response) =>{
     await notifyUnpaidMembers(req,res);
 });
 
