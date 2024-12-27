@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import User from "../models/user";
 import Friend from "../models/friend";
+import friend from "../models/friend";
 
 export const addFriend = async (req: Request, res: Response) => {
     try {
@@ -122,13 +123,17 @@ export const getFriendshipList = async (req:Request, res:Response) => {
                     }
                 }
             },
-            {
-                $project:{
-                    _id:0,
-                    friendID:"$_id"
-                }
-            }
         ]);
+
+        const friendDetails = await Promise.all(
+            friendshipList.map(async (friend) => {
+                const friendUser = await User.findOne({userID:friend._id});
+                return{
+                    userID: friendUser?.userID,
+                    userName: friendUser?.userName
+                }
+            })
+        )
 
         if(friendshipList.length === 0){
             return res.status(200).json({
@@ -140,7 +145,7 @@ export const getFriendshipList = async (req:Request, res:Response) => {
 
         return res.status(200).json({
             success:true,
-            data:friendshipList.map(e => e.friendID),
+            data:friendDetails,
             count:friendshipList.length
         });
     }catch(error){

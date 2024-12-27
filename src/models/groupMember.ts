@@ -12,6 +12,7 @@ interface IGroupMember extends Document{
 
 export interface IMemberInput{
     userID: string,
+    userName?: String,
     amount: number,
     payStatus: boolean
 }
