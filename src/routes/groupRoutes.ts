@@ -35,7 +35,7 @@ router.get('/notifyUnpaidMembers/:groupID',async (req:Request,res:Response) =>{
     await notifyUnpaidMembers(req,res);
 });
 
-router.get('/notifyUpdatePaymentStatus',async (req:Request,res:Response) => {
+router.get('/notifyUpdatePaymentStatus/:groupID/:userID/:status',async (req:Request,res:Response) => {
     await notifyUpdatePaymentStatus(req,res);
 });
 
