@@ -378,7 +378,7 @@ export const notifyUpdatePaymentStatus = async (req: Request,res: Response) => {
                 token: user.fcmToken!,
                 notification:{
                     title: '付款狀態更新',
-                    body: `您在群組 ${group.groupName} 的付款狀態已更新為 ${status}`
+                    body: `您在群組 ${group.groupName} 的付款狀態已更新為 ${status === 'paid' ? '已付款' : '尚未付款'}`
                 },
                 data: {
                     groupID:groupID,
